@@ -1,0 +1,5 @@
+aiohttp
+pycryptodome
+python-cfonts
+protobuf-decoder
+urllib3
