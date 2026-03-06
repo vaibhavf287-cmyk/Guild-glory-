@@ -1,9 +1,24 @@
 import asyncio, aiohttp, urllib3, os
-from packet import * # Make sure packet.py is in the repo
+from flask import Flask
+from threading import Thread
+from packet import *
+from cfonts import render
 
 urllib3.disable_warnings()
 
-# --- FIXED DETAILS ---
+# --- WEB SERVER FOR RENDER (Keep Alive) ---
+app = Flask('')
+@app.route('/')
+def home(): return "Bot is Online!"
+
+def run_web():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = Thread(target=run_web)
+    t.start()
+
+# --- BOT CONFIGURATION ---
 TARGET_UID = "13613551627" 
 BOT_UID = "4394953577" 
 BOT_PW = "76A2A700373750BA73DCB8A26CDC056A2C8F8F79AFB3B36F18282B46828311D3"
@@ -22,34 +37,33 @@ class GloryBot:
                 res = await resp.json()
                 return res.get("access_token")
 
-    async def Run(self):
-        print(f"🚀 Bot Started for Target: {TARGET_UID}")
+    async def Start_Bot(self):
+        print(render('RENDER-BOT', colors=['white', 'blue'], align='center'))
         token = await self.Get_Token()
         if not token:
-            print("❌ Login Fail! Check Token."); return
+            print("❌ Login Fail!"); return
 
-        # Static Server Connection
         try:
             self.reader, self.writer = await asyncio.open_connection("203.116.201.71", 10008)
-            print("✅ Connected to Garena Server")
+            print(f"✅ Bot Online: {BOT_UID}")
             
             while True:
-                # Glory Loop
                 await self.writer.write(await SwitchLoneWolf(self.key, self.iv))
-                print("📨 Sending Invite...")
+                print(f"📩 Inviting {TARGET_UID}...")
                 await self.writer.write(await InvitePlayer(TARGET_UID, self.key, self.iv))
-                await asyncio.sleep(12) # Wait for join
                 
-                print("🎮 Match Starting...")
+                await asyncio.sleep(12) # Wait for you to join
+                
+                print("🎮 Starting...")
                 await self.writer.write(await StartGame(BOT_UID, self.key, self.iv))
-                await asyncio.sleep(15) # Loading
+                await asyncio.sleep(15) # Match loading
                 
-                print("🚪 Auto-Exit...")
+                print("🚪 Exiting for Glory...")
                 await self.writer.write(await ExitMatch(self.key, self.iv))
-                await asyncio.sleep(10)
+                await asyncio.sleep(10) # Return to lobby
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error: {e}"); await asyncio.sleep(5)
 
 if __name__ == "__main__":
-    bot = GloryBot()
-    asyncio.run(bot.Run())
+    keep_alive() # Starts Flask Web Server
+    asyncio.run(GloryBot().Start_Bot())
