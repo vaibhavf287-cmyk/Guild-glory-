@@ -1,7 +1,7 @@
 name: FF_GLORY_BOT
 
 on:
-  workflow_dispatch: # Isse "Run Workflow" ka button aayega
+  workflow_dispatch: # Yahi wo line hai jo "Run Workflow" button laati hai
 
 jobs:
   run-bot:
