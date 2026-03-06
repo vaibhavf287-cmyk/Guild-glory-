@@ -1,0 +1,20 @@
+name: FF_GLORY_BOT
+on:
+  workflow_dispatch: # Isse aap manually start kar sakte hain
+  schedule:
+    - cron: '0 */6 * * *' # Har 6 ghante mein restart hoga (taaki block na ho)
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install Deps
+        run: pip install -r requirements.txt
+      - name: Run
+        run: python main.py
